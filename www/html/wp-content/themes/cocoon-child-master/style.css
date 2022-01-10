@@ -1,0 +1,86 @@
+@charset "UTF-8";
+
+/*!
+Theme Name: Cocoon Child
+Description: Cocoon専用の子テーマ
+Theme URI: https://wp-cocoon.com/
+Author: わいひら
+Author URI: https://nelog.jp/
+Template:   cocoon-master
+Version:    1.1.3
+*/
+
+/************************************
+** 子テーマ用のスタイルを書く
+************************************/
+/*必要ならばここにコードを書く*/
+/* ヘッダメニュー */
+#navi {
+  background: rgba(0,0,0,0.2);
+}
+
+
+/* メイン背景色 */
+body.home #main {
+  background: rgba(0,0,0,0.5);
+}
+
+body.home .entry-card {
+  background: #fff;
+}
+
+/* ボタン色 */
+.index-tab-button {
+  background: #2b2c48!important;
+  border: 1px solid #2b2c48!important;
+}
+
+/* 検索窓(PCの場合のみ、横幅を制限) */
+@media screen and (min-width: 481px) {
+  #search-2 {
+    width: 50%;
+    margin: 0 auto;
+  }
+}
+
+/* モバイルのヘッダ・フッタメニュー */
+.mobile-menu-buttons {
+  background: rgba(0,0,0,0.6);
+  color: white;
+}
+.mobile-menu-buttons .menu-button > a {
+  color: white;
+}
+
+/*mobile スライドインナビメニュー色*/
+div.navi-menu-content {
+    background: rgba(0, 0, 0, 0.8);/* 背景色：黒*/  
+}
+.menu-drawer a:hover {
+    background-color: transparent;/*背景透明 */
+    color: #808000; /* 文字色:オリーブ→ここを変更 */
+}
+ 
+/*mobile スライドインナビ文字色.枠線*/
+.navi-menu-content ul li a{
+  border-bottom: 1px dashed #fff; /* 下線の種類:白 */
+  color: #fff; /* 文字色:白 */
+}
+
+/************************************
+** レスポンシブデザイン用のメディアクエリ
+************************************/
+/*1023px以下*/
+@media screen and (max-width: 1023px){
+  /*必要ならばここにコードを書く*/
+}
+
+/*834px以下*/
+@media screen and (max-width: 834px){
+  /*必要ならばここにコードを書く*/
+}
+
+/*480px以下*/
+@media screen and (max-width: 480px){
+  /*必要ならばここにコードを書く*/
+}
