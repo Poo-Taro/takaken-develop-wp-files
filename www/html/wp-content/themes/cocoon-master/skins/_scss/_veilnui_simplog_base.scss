@@ -209,6 +209,7 @@ body {
 
 // Sidebar サイドバー
 #sidebar-menu-content {
+  h2,
   h3 {
     background-color: $main-color-midium;
     color: $white-color;
@@ -378,6 +379,9 @@ body {
       }
       .amazon-button {
         background-color: #FF9900;
+      }
+      .twitch-button {
+        background-color: #6441A4;
       }
       .rakuten-room-button {
         background-color: #C61E79;

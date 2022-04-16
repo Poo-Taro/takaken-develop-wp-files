@@ -2,9 +2,8 @@
 /*!
   Skin Name: Veilnui Simplog (deep purple)
   Description: シンプルなブログスキン（濃紫色）
-  Skin URI: https://simplog.veilnui.org
+  Skin URI: https://wp-cocoon.com/veilnui-simplog
   Author: veilnui
-  Author URI: https://veilnui.net/
   Priority: 9840001000
   Screenshot URI: https://wp-cocoon.com/wp-content/themes/cocoon-master/skins/veilnui-simplog-deep-purple/images/image.png
   Version: 1.1.7
@@ -120,7 +119,9 @@ body {
   color: #7E57C2;
 }
 
-#sidebar-menu-content h3, #sidebar h3 {
+#sidebar-menu-content h2, #sidebar h2,
+#sidebar-menu-content h3,
+#sidebar h3 {
   background-color: #7E57C2;
   color: white;
   padding: 5px 5px 5px 42px;
@@ -128,7 +129,9 @@ body {
   position: relative;
   z-index: 0;
 }
-#sidebar-menu-content h3::after, #sidebar h3::after {
+#sidebar-menu-content h2::after, #sidebar h2::after,
+#sidebar-menu-content h3::after,
+#sidebar h3::after {
   position: absolute;
   content: "";
   top: -2px;
@@ -260,6 +263,9 @@ body {
 }
 #sidebar .widget_author_box .author-box .amazon-button, #slide-in-sidebar .widget_author_box .author-box .amazon-button {
   background-color: #FF9900;
+}
+#sidebar .widget_author_box .author-box .twitch-button, #slide-in-sidebar .widget_author_box .author-box .twitch-button {
+  background-color: #6441A4;
 }
 #sidebar .widget_author_box .author-box .rakuten-room-button, #slide-in-sidebar .widget_author_box .author-box .rakuten-room-button {
   background-color: #C61E79;

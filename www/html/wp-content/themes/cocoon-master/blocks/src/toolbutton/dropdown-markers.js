@@ -9,7 +9,7 @@ import { THEME_NAME } from '../helpers.js';
 import { __ } from '@wordpress/i18n';
 import { registerFormatType } from '@wordpress/rich-text';
 import { BlockFormatControls } from '@wordpress/block-editor';
-import { Slot, Toolbar, DropdownMenu } from '@wordpress/components';
+import { Slot, ToolbarGroup, ToolbarDropdownMenu } from '@wordpress/components';
 import { Icon, brush } from '@wordpress/icons';
 import { orderBy } from 'lodash';
 const FORMAT_TYPE_NAME = 'cocoon-blocks/markers';
@@ -25,10 +25,10 @@ if (isMarkerVisible) {
       return (
         <BlockFormatControls>
           <div className="editor-format-toolbar block-editor-format-toolbar">
-            <Toolbar>
+            <ToolbarGroup>
               <Slot name="Marker.ToolbarControls">
                 { ( fills ) => fills.length !== 0 &&
-                  <DropdownMenu
+                  <ToolbarDropdownMenu
                     icon={<Icon icon={brush} size={32} />}
                     label={__( '文字', THEME_NAME )}
                     className='letters'
@@ -36,7 +36,7 @@ if (isMarkerVisible) {
                   />
                 }
               </Slot>
-            </Toolbar>
+            </ToolbarGroup>
           </div>
         </BlockFormatControls>
       );

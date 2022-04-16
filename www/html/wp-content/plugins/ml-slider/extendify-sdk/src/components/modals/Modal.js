@@ -1,25 +1,15 @@
-import { Dialog, Transition } from '@headlessui/react'
+import { Button } from '@wordpress/components'
 import { Fragment, useRef, forwardRef } from '@wordpress/element'
 import { __ } from '@wordpress/i18n'
 import { Icon, close } from '@wordpress/icons'
-import { Button } from '@wordpress/components'
-
-const CloseButton = forwardRef((props, focusRef) => {
-    return (
-        <Button
-            {...props}
-            icon={<Icon icon={close} />}
-            ref={focusRef}
-            className="text-extendify-black opacity-75 hover:opacity-100"
-            showTooltip={false}
-            label={__('Close dialog', 'extendify')}
-        />
-    )
-})
+import { Dialog, Transition } from '@headlessui/react'
+import { useGlobalStore } from '@extendify/state/GlobalState'
 
 export const Modal = forwardRef(
-    ({ isOpen, heading, onRequestClose, children }, initialFocus) => {
+    ({ isOpen, heading, onClose, children }, initialFocus) => {
         const focusBackup = useRef(null)
+        const defaultClose = useGlobalStore((state) => state.removeAllModals)
+        onClose = onClose ?? defaultClose
 
         return (
             <Transition
@@ -29,8 +19,8 @@ export const Modal = forwardRef(
                 className="extendify">
                 <Dialog
                     initialFocus={initialFocus ?? focusBackup}
-                    onClose={onRequestClose}>
-                    <div className="fixed z-high inset-0 flex">
+                    onClose={onClose}>
+                    <div className="fixed inset-0 z-high flex">
                         <Transition.Child
                             as={Fragment}
                             enter="ease-out duration-200 transition"
@@ -43,22 +33,20 @@ export const Modal = forwardRef(
                             enter="ease-out duration-300 translate transform"
                             enterFrom="opacity-0 translate-y-4 sm:translate-y-5"
                             enterTo="opacity-100 translate-y-0">
-                            <div className="m-auto relative w-full">
-                                <div className="bg-white shadow-modal items-center justify-center m-auto max-w-lg relative rounded-sm w-full">
+                            <div className="relative m-auto w-full">
+                                <div className="relative m-auto w-full max-w-lg items-center justify-center rounded-sm bg-white shadow-modal">
                                     {heading ? (
-                                        <div className="border-b flex justify-between items-center leading-none pl-8 py-2 pr-3">
-                                            <span className="text-base text-extendify-black whitespace-nowrap">
+                                        <div className="flex items-center justify-between border-b py-2 pl-6 pr-3 leading-none">
+                                            <span className="whitespace-nowrap text-base text-extendify-black">
                                                 {heading}
                                             </span>
-                                            <CloseButton
-                                                onClick={onRequestClose}
-                                            />
+                                            <CloseButton onClick={onClose} />
                                         </div>
                                     ) : (
-                                        <div className="absolute block px-4 py-4 top-0 right-0 ">
+                                        <div className="absolute top-0 right-0 block px-4 py-4 ">
                                             <CloseButton
                                                 ref={focusBackup}
-                                                onClick={onRequestClose}
+                                                onClick={onClose}
                                             />
                                         </div>
                                     )}
@@ -72,3 +60,16 @@ export const Modal = forwardRef(
         )
     },
 )
+
+const CloseButton = forwardRef((props, focusRef) => {
+    return (
+        <Button
+            {...props}
+            icon={<Icon icon={close} />}
+            ref={focusRef}
+            className="text-extendify-black opacity-75 hover:opacity-100"
+            showTooltip={false}
+            label={__('Close dialog', 'extendify')}
+        />
+    )
+})

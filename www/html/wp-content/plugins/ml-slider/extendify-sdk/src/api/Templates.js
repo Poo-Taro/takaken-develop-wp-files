@@ -1,5 +1,6 @@
+import { useTemplatesStore } from '@extendify/state/Templates'
+import { useUserStore } from '@extendify/state/User'
 import { Axios as api } from './axios'
-import { useUserStore } from '../state/User'
 
 let count = 0
 
@@ -9,39 +10,53 @@ export const Templates = {
         const defaultpageSize = searchParams.type === 'pattern' ? '8' : '4'
         const taxonomyType =
             searchParams.type === 'pattern' ? 'patternType' : 'layoutType'
-        const templates = await api.post('templates', {
-            filterByFormula: prepareFilterFormula(searchParams, taxonomyType),
-            pageSize: options?.pageSize ?? defaultpageSize,
-            categories: searchParams.taxonomies,
-            search: searchParams.search,
-            type: searchParams.type,
-            offset: options.offset ?? '',
-            initial: count === 1,
-            request_count: count,
-            sdk_partner: useUserStore.getState()?.sdkPartner ?? '',
-        })
-        return templates
+        const args = Object.assign(
+            {
+                filterByFormula: prepareFilterFormula(
+                    searchParams,
+                    taxonomyType,
+                ),
+                pageSize: defaultpageSize,
+                categories: searchParams.taxonomies,
+                search: searchParams.search,
+                type: searchParams.type,
+                offset: '',
+                initial: count === 1,
+                request_count: count,
+                sdk_partner: useUserStore.getState().sdkPartner ?? '',
+            },
+            options,
+        )
+        return await api.post('templates', args)
     },
 
     // TODO: Refactor this later to combine the following three
     maybeImport(template) {
+        const categories =
+            useTemplatesStore.getState()?.searchParams?.taxonomies ?? []
         return api.post(`templates/${template.id}`, {
             template_id: template?.id,
+            categories,
             maybe_import: true,
             type: template.fields?.type,
+            sdk_partner: useUserStore.getState().sdkPartner ?? '',
             pageSize: '1',
             template_name: template.fields?.title,
         })
     },
     import(template) {
+        const categories =
+            useTemplatesStore.getState()?.searchParams?.taxonomies ?? []
         return api.post(`templates/${template.id}`, {
             template_id: template.id,
+            categories,
             imported: true,
             basePattern:
                 template.fields?.basePattern ??
                 template.fields?.baseLayout ??
                 '',
             type: template.fields.type,
+            sdk_partner: useUserStore.getState().sdkPartner ?? '',
             pageSize: '1',
             template_name: template.fields?.title,
         })
@@ -49,9 +64,7 @@ export const Templates = {
 }
 
 const prepareFilterFormula = ({ taxonomies }, type) => {
-    const siteType = taxonomies?.siteType?.slug?.length
-        ? taxonomies.siteType.slug
-        : 'default'
+    const siteType = taxonomies?.siteType?.slug
     const formula = [
         `{type}="${type.replace('Type', '')}"`,
         `{siteType}="${siteType}"`,

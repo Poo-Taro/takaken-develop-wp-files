@@ -1,4 +1,10 @@
 
+.go-to-top .go-to-top-button{
+  background-color: #2b2c48;
+}
+.go-to-top .go-to-top-button{
+  color: #ffffff;
+}
 .main{
   width: 702px;
 }

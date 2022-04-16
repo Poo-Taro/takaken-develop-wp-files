@@ -42,7 +42,7 @@ registerFormatType( 'cocoon-blocks/html', {
 
     // @see keycodes/src/index.js
     const shortcutType = 'primaryShift';
-    const shortcutCharacter ='';
+    const shortcutCharacter ='h';
     return (
       <Fragment>
         <RichTextShortcut type={shortcutType} character={shortcutCharacter} onUse={onToggle}  />

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useUserStore } from '../state/User'
+import { useUserStore } from '@extendify/state/User'
 
 const Axios = axios.create({
     baseURL: window.extendifyData.root,
@@ -26,12 +26,15 @@ function handleErrors(error) {
 }
 
 function addDefaults(request) {
+    const userState = useUserStore.getState()
+    const remainingImports = userState.apiKey
+        ? 'unlimited'
+        : userState.remainingImports()
     if (request.data) {
-        request.data.remaining_imports = useUserStore
-            .getState()
-            .remainingImports()
-        request.data.entry_point = useUserStore.getState().entryPoint
-        request.data.total_imports = useUserStore.getState().imports
+        request.data.remaining_imports = remainingImports
+        request.data.entry_point = userState.entryPoint
+        request.data.total_imports = userState.imports
+        request.data.participating_tests = userState.activeTestGroups()
     }
     return request
 }

@@ -359,21 +359,6 @@ add_action('init', function () {
     }',
   ));
 
-  // //アコーディオンボックス
-  // register_block_style('cocoon-blocks/toggle-box-1', array(
-  //   'name' => 'faq',
-  //   'label' => __('FAQ型', THEME_NAME),
-  //   // 'inline_style' => '.is-style-square .faq-item-label{
-  //   //   color: #fff !important;
-  //   //   background-color: #b7282e;
-  //   //   font-size: 20px;
-  //   //   padding: 5px 8px;
-  //   //   height: 100%;
-  //   // }
-  //   // .is-style-square .faq-answer-label{
-  //   //   background-color: #007bbb;
-  //   // }',
-  // ));
 });
 
 
@@ -444,3 +429,13 @@ function cocoon_footer_faq_script() {
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT).'</script>';
   }
 }
+
+//oembedプロバイダーからread.amazonを削除
+add_filter('oembed_providers', function ($providers){
+  foreach ($providers as $key => $value) {
+    if (includes_string($value[0], 'read.amazon.')) {
+      unset($providers[$key]);
+    }
+  }
+  return $providers;
+});

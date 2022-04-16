@@ -60,7 +60,7 @@ Cocoonテーマの再配布もしくは、Cocoonを基盤として作成した�
 
 [Masonry](http://masonry.desandro.com/)
 
-[slicknav](http://slicknav.io/)
+[slicknav](https://computerwolf.github.io/SlickNav/)
 
 [slick](http://kenwheeler.github.io/slick/)
 
@@ -128,3 +128,13 @@ CSS参考
 [semicolon3253](https://github.com/semicolon3253)
 
 [tsukumi](https://github.com/tsukumijima)
+
+[taako](https://github.com/taako-502)
+
+[takumiando](https://github.com/takumiando)
+
+[Takeyuki Miyagi](https://github.com/v97ug)
+
+[hausercarl](https://github.com/hausercarl)
+
+[mirumi](https://github.com/mirumirumi)

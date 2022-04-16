@@ -6,7 +6,7 @@ Theme URI: https://wp-cocoon.com/
 Author: わいひら
 Author URI: https://nelog.jp/
 Text Domain: cocoon
-Version: 2.3.9
+Version: 2.4.3
 Requires at least: 5.7.0
 Requires PHP: 5.6.0
 Tags: two-columns, left-sidebar, right-sidebar
@@ -1196,6 +1196,9 @@ img.emoji {
 .bc-brand-color.sns-share .amazon-button, .bc-brand-color.sns-follow .amazon-button {
   background-color: #ff9900;
 }
+.bc-brand-color.sns-share .twitch-button, .bc-brand-color.sns-follow .twitch-button {
+  background-color: #6441a4;
+}
 .bc-brand-color.sns-share .rakuten-room-button, .bc-brand-color.sns-follow .rakuten-room-button {
   background-color: #c61e79;
 }
@@ -1286,6 +1289,10 @@ img.emoji {
 .bc-brand-color-white.sns-share .amazon-button, .bc-brand-color-white.sns-follow .amazon-button {
   color: #ff9900;
   border-color: #ff9900;
+}
+.bc-brand-color-white.sns-share .twitch-button, .bc-brand-color-white.sns-follow .twitch-button {
+  color: #6441a4;
+  border-color: #6441a4;
 }
 .bc-brand-color-white.sns-share .rakuten-room-button, .bc-brand-color-white.sns-follow .rakuten-room-button {
   color: #c61e79;
@@ -2085,6 +2092,7 @@ img.blogcard-favicon-image {
   border-radius: 4px;
   background-color: #fff;
 }
+.sidebar h2,
 .sidebar h3 {
   background-color: #f5f6f7;
   padding: 12px;
@@ -2198,7 +2206,8 @@ label.screen-reader-text {
 .widget_pages ul,
 .widget_meta ul,
 .widget_rss ul,
-.widget_nav_menu ul {
+.widget_nav_menu ul,
+.widget_block ul {
   padding: 0;
   margin: 0;
   list-style: none;
@@ -2209,7 +2218,8 @@ label.screen-reader-text {
 .widget_pages ul li ul,
 .widget_meta ul li ul,
 .widget_rss ul li ul,
-.widget_nav_menu ul li ul {
+.widget_nav_menu ul li ul,
+.widget_block ul li ul {
   padding-left: 20px;
   margin: 0;
 }
@@ -2219,7 +2229,8 @@ label.screen-reader-text {
 .widget_pages ul li a,
 .widget_meta ul li a,
 .widget_rss ul li a,
-.widget_nav_menu ul li a {
+.widget_nav_menu ul li a,
+.widget_block ul li a {
   color: #333;
   text-decoration: none;
   padding: 10px 0;
@@ -2233,7 +2244,8 @@ label.screen-reader-text {
 .widget_pages ul li a:hover,
 .widget_meta ul li a:hover,
 .widget_rss ul li a:hover,
-.widget_nav_menu ul li a:hover {
+.widget_nav_menu ul li a:hover,
+.widget_block ul li a:hover {
   background-color: #f5f8fa;
   transition: all 0.3s ease-in-out;
   color: #333;
@@ -2244,7 +2256,8 @@ label.screen-reader-text {
 .widget_pages ul li a .post-count,
 .widget_meta ul li a .post-count,
 .widget_rss ul li a .post-count,
-.widget_nav_menu ul li a .post-count {
+.widget_nav_menu ul li a .post-count,
+.widget_block ul li a .post-count {
   display: block;
   float: right;
 }
@@ -2563,6 +2576,25 @@ label.screen-reader-text {
 
 .entry-content .main-widget-label {
   display: none;
+}
+
+.widget_recent_comments ul {
+  padding-left: 0;
+}
+.widget_recent_comments ul li {
+  list-style: none;
+}
+
+.wp-block-latest-comments {
+  padding-left: 0;
+}
+
+.widget_search .wp-block-search__button {
+  padding: .375em 0.1em;
+  font-size: 14px;
+}
+.widget_search .wp-block-search__input {
+  line-height: normal;
 }
 
 /*拡張クラスを追加するスタイルシート*/
@@ -4046,7 +4078,6 @@ div.search-form {
 
 .btn-wrap {
   float: none !important;
-  margin: 0 !important;
   min-height: 2em;
 }
 .btn-wrap img[width="1"] {
@@ -5383,9 +5414,14 @@ div.search-form {
 .toggle-button::before {
   content: '\f067';
   font-family: FontAwesome;
-  margin-right: 0.4em;
+  margin-right: 0.8em;
   font-size: 0.8em;
   color: #999;
+  opacity: 0.3;
+}
+
+.has-border-color .toggle-button::before {
+  opacity: 0.6;
 }
 
 .toggle-button:hover {
@@ -5422,7 +5458,7 @@ div.search-form {
   color: #fff;
 }
 .tb-red .toggle-button::before {
-  color: #ddd;
+  color: #e60033;
 }
 .tb-red .toggle-checkbox:checked ~ .toggle-content {
   border-color: #e60033;
@@ -5434,7 +5470,7 @@ div.search-form {
   color: #fff;
 }
 .tb-pink .toggle-button::before {
-  color: #ddd;
+  color: #e95295;
 }
 .tb-pink .toggle-checkbox:checked ~ .toggle-content {
   border-color: #e95295;
@@ -5446,7 +5482,7 @@ div.search-form {
   color: #fff;
 }
 .tb-purple .toggle-button::before {
-  color: #ddd;
+  color: #884898;
 }
 .tb-purple .toggle-checkbox:checked ~ .toggle-content {
   border-color: #884898;
@@ -5458,7 +5494,7 @@ div.search-form {
   color: #fff;
 }
 .tb-blue .toggle-button::before {
-  color: #ddd;
+  color: #0095d9;
 }
 .tb-blue .toggle-checkbox:checked ~ .toggle-content {
   border-color: #0095d9;
@@ -5470,7 +5506,7 @@ div.search-form {
   color: #fff;
 }
 .tb-green .toggle-button::before {
-  color: #ddd;
+  color: #3eb370;
 }
 .tb-green .toggle-checkbox:checked ~ .toggle-content {
   border-color: #3eb370;
@@ -5482,7 +5518,7 @@ div.search-form {
   color: #fff;
 }
 .tb-orange .toggle-button::before {
-  color: #ddd;
+  color: #f39800;
 }
 .tb-orange .toggle-checkbox:checked ~ .toggle-content {
   border-color: #f39800;
@@ -5494,7 +5530,7 @@ div.search-form {
   color: #fff;
 }
 .tb-yellow .toggle-button::before {
-  color: #ddd;
+  color: #ffd900;
 }
 .tb-yellow .toggle-checkbox:checked ~ .toggle-content {
   border-color: #ffd900;
@@ -5506,7 +5542,7 @@ div.search-form {
   color: #fff;
 }
 .tb-brown .toggle-button::before {
-  color: #ddd;
+  color: #954e2a;
 }
 .tb-brown .toggle-checkbox:checked ~ .toggle-content {
   border-color: #954e2a;
@@ -5518,7 +5554,7 @@ div.search-form {
   color: #fff;
 }
 .tb-grey .toggle-button::before {
-  color: #ddd;
+  color: #949495;
 }
 .tb-grey .toggle-checkbox:checked ~ .toggle-content {
   border-color: #949495;
@@ -5530,7 +5566,7 @@ div.search-form {
   color: #fff;
 }
 .tb-black .toggle-button::before {
-  color: #ddd;
+  color: #333;
 }
 .tb-black .toggle-checkbox:checked ~ .toggle-content {
   border-color: #333;
@@ -5542,7 +5578,7 @@ div.search-form {
   color: #fff;
 }
 .tb-deep .toggle-button::before {
-  color: #ddd;
+  color: #55295b;
 }
 .tb-deep .toggle-checkbox:checked ~ .toggle-content {
   border-color: #55295b;
@@ -5554,7 +5590,7 @@ div.search-form {
   color: #fff;
 }
 .tb-indigo .toggle-button::before {
-  color: #ddd;
+  color: #1e50a2;
 }
 .tb-indigo .toggle-checkbox:checked ~ .toggle-content {
   border-color: #1e50a2;
@@ -5566,7 +5602,7 @@ div.search-form {
   color: #fff;
 }
 .tb-light-blue .toggle-button::before {
-  color: #ddd;
+  color: #2ca9e1;
 }
 .tb-light-blue .toggle-checkbox:checked ~ .toggle-content {
   border-color: #2ca9e1;
@@ -5578,7 +5614,7 @@ div.search-form {
   color: #fff;
 }
 .tb-cyan .toggle-button::before {
-  color: #ddd;
+  color: #00a3af;
 }
 .tb-cyan .toggle-checkbox:checked ~ .toggle-content {
   border-color: #00a3af;
@@ -5590,7 +5626,7 @@ div.search-form {
   color: #fff;
 }
 .tb-teal .toggle-button::before {
-  color: #ddd;
+  color: #007b43;
 }
 .tb-teal .toggle-checkbox:checked ~ .toggle-content {
   border-color: #007b43;
@@ -5602,7 +5638,7 @@ div.search-form {
   color: #fff;
 }
 .tb-light-green .toggle-button::before {
-  color: #ddd;
+  color: #8bc34a;
 }
 .tb-light-green .toggle-checkbox:checked ~ .toggle-content {
   border-color: #8bc34a;
@@ -5614,7 +5650,7 @@ div.search-form {
   color: #fff;
 }
 .tb-lime .toggle-button::before {
-  color: #ddd;
+  color: #c3d825;
 }
 .tb-lime .toggle-checkbox:checked ~ .toggle-content {
   border-color: #c3d825;
@@ -5626,7 +5662,7 @@ div.search-form {
   color: #fff;
 }
 .tb-amber .toggle-button::before {
-  color: #ddd;
+  color: #ffc107;
 }
 .tb-amber .toggle-checkbox:checked ~ .toggle-content {
   border-color: #ffc107;
@@ -5638,7 +5674,7 @@ div.search-form {
   color: #fff;
 }
 .tb-deep-orange .toggle-button::before {
-  color: #ddd;
+  color: #ea5506;
 }
 .tb-deep-orange .toggle-checkbox:checked ~ .toggle-content {
   border-color: #ea5506;
@@ -5650,7 +5686,7 @@ div.search-form {
   color: #fff;
 }
 .tb-white .toggle-button::before {
-  color: #ddd;
+  color: #fff;
 }
 .tb-white .toggle-checkbox:checked ~ .toggle-content {
   border-color: #fff;
@@ -9018,6 +9054,7 @@ input[type='submit'] {
   -webkit-appearance: none;
   border: 1px solid #ddd;
   background-color: #f5f8fa;
+  color: #333;
 }
 
 .bp-login-widget-register-link {

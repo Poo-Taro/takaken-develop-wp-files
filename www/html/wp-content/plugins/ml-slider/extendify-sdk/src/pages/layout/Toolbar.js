@@ -1,35 +1,29 @@
+import { Button } from '@wordpress/components'
+import { memo } from '@wordpress/element'
 import { __ } from '@wordpress/i18n'
 import { Icon, close } from '@wordpress/icons'
-import { Button } from '@wordpress/components'
-import { TypeSelect } from '../../components/TypeSelect'
-import { useGlobalStore } from '../../state/GlobalState'
-import { user } from '../../components/icons/'
-import SettingsModal from '../../components/modals/SettingsModal'
-import { useUserStore } from '../../state/User'
+import { TypeSelect } from '@extendify/components/TypeSelect'
+import { user } from '@extendify/components/icons/'
+import { SettingsModal } from '@extendify/components/modals/settings/SettingsModal'
+import { useGlobalStore } from '@extendify/state/GlobalState'
+import { useUserStore } from '@extendify/state/User'
 
-export const Toolbar = ({ className }) => {
+export const Toolbar = memo(function Toolbar({ className }) {
     const setOpen = useGlobalStore((state) => state.setOpen)
-    const setCurrentModal = useGlobalStore((state) => state.setCurrentModal)
+    const pushModal = useGlobalStore((state) => state.pushModal)
     const loggedIn = useUserStore((state) => state.apiKey.length)
 
     return (
         <div className={className}>
-            <div className="flex justify-between items-center h-full">
+            <div className="flex h-full items-center justify-between">
                 <div className="flex-1"></div>
-                <TypeSelect className="flex-1 flex items-center justify-center" />
-                <div className="flex-1 flex justify-end items-center">
+                <TypeSelect className="flex flex-1 items-center justify-center" />
+                <div className="flex flex-1 items-center justify-end">
                     <Button
-                        onClick={() =>
-                            setCurrentModal(
-                                <SettingsModal
-                                    isOpen={true}
-                                    onClose={() => setCurrentModal(null)}
-                                />,
-                            )
-                        }
+                        onClick={() => pushModal(<SettingsModal />)}
                         icon={<Icon icon={user} size={24} />}
                         label={__('Login and settings area', 'extendify')}>
-                        {loggedIn ? '' : __('Log In', 'extendify')}
+                        {loggedIn ? '' : __('Sign in', 'extendify')}
                     </Button>
                     <Button
                         onClick={() => setOpen(false)}
@@ -40,4 +34,4 @@ export const Toolbar = ({ className }) => {
             </div>
         </div>
     )
-}
+})

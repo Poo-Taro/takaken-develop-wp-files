@@ -1,24 +1,41 @@
-import Masonry from 'react-masonry-css'
-import { useEffect, useState, useCallback, useRef } from '@wordpress/element'
 import { Spinner, Button } from '@wordpress/components'
+import {
+    useEffect,
+    useState,
+    useCallback,
+    useRef,
+    memo,
+} from '@wordpress/element'
 import { __, sprintf } from '@wordpress/i18n'
-import { useTemplatesStore } from '../state/Templates'
-import { Templates as TemplatesApi } from '../api/Templates'
+import { cloneDeep } from 'lodash'
 import { useInView } from 'react-intersection-observer'
-import { useIsMounted } from '../hooks/helpers'
-import { ImportTemplateBlock } from '../components/ImportTemplateBlock'
+import Masonry from 'react-masonry-css'
+import { Templates as TemplatesApi } from '@extendify/api/Templates'
+import { ImportTemplateBlock } from '@extendify/components/ImportTemplateBlock'
+import { useIsMounted } from '@extendify/hooks/helpers'
+import { useTestGroup } from '@extendify/hooks/useTestGroup'
+import { useGlobalStore } from '@extendify/state/GlobalState'
+import { useTaxonomyStore } from '@extendify/state/Taxonomies'
+import { useTemplatesStore } from '@extendify/state/Templates'
 
-export default function GridView() {
+export const GridView = memo(function GridView() {
     const isMounted = useIsMounted()
     const templates = useTemplatesStore((state) => state.templates)
     const appendTemplates = useTemplatesStore((state) => state.appendTemplates)
     const [serverError, setServerError] = useState('')
+    const retryOnce = useRef(false)
     const [nothingFound, setNothingFound] = useState(false)
+    const [loading, setLoading] = useState(false)
     const [loadMoreRef, inView] = useInView()
-    const updateSearchParams = useTemplatesStore(
-        (state) => state.updateSearchParams,
-    )
     const searchParamsRaw = useTemplatesStore((state) => state.searchParams)
+    const currentType = useGlobalStore((state) => state.currentType)
+    const resetTemplates = useTemplatesStore((state) => state.resetTemplates)
+    const open = useGlobalStore((state) => state.open)
+    const taxonomies = useTaxonomyStore((state) => state.taxonomies)
+    const updateType = useTemplatesStore((state) => state.updateType)
+    const updateTaxonomies = useTemplatesStore(
+        (state) => state.updateTaxonomies,
+    )
 
     // Store the next page in case we have pagination
     const nextPage = useRef(useTemplatesStore.getState().nextPage)
@@ -26,65 +43,115 @@ export default function GridView() {
     const taxonomyType =
         searchParams.current.type === 'pattern' ? 'patternType' : 'layoutType'
     const currentTax = searchParams.current.taxonomies[taxonomyType]
+    const defaultOrAlt = useTestGroup('default-or-alt-sitetype', ['A', 'B'])
 
-    // Connect to the store on mount, disconnect on unmount, catch state-changes in a reference
-    useEffect(
-        () =>
-            useTemplatesStore.subscribe(
-                (n) => (nextPage.current = n),
-                (state) => state.nextPage,
-            ),
-        [],
-    )
-    useEffect(
-        () =>
-            useTemplatesStore.subscribe(
-                (s) => (searchParams.current = s),
-                (state) => state.searchParams,
-            ),
-        [],
-    )
+    // Subscribing to the store will keep these values updates synchronously
+    useEffect(() => {
+        return useTemplatesStore.subscribe(
+            (state) => state.nextPage,
+            (n) => (nextPage.current = n),
+        )
+    }, [])
+    useEffect(() => {
+        return useTemplatesStore.subscribe(
+            (state) => state.searchParams,
+            (s) => (searchParams.current = s),
+        )
+    }, [])
 
     // Fetch the templates then add them to the current state
-    // TODO: This works, but it's not really doing what it's intended to do
-    // as it has a side effect in there, and isn't pure.
-    // It could be extracted to a hook
-    const fetchTemplates = useCallback(async () => {
-        setServerError('')
-        setNothingFound(false)
-        const response = await TemplatesApi.get(searchParams.current, {
-            offset: nextPage.current,
-        }).catch((error) => {
-            console.error(error)
-            setServerError(
-                error && error.message
-                    ? error.message
-                    : __(
-                          'Unknown error occured. Check browser console or contact support.',
-                          'extendify',
-                      ),
-            )
-        })
-        if (!isMounted.current) {
+    const fetchTemplates = useCallback(() => {
+        if (!defaultOrAlt) {
             return
         }
-        if (response?.error?.length) {
-            setServerError(response?.error)
-        }
-        if (response?.records && searchParamsRaw === searchParams.current) {
-            useTemplatesStore.setState({
-                nextPage: response.offset,
+        setServerError('')
+        setNothingFound(false)
+        const defaultError = __(
+            'Unknown error occured. Check browser console or contact support.',
+            'extendify',
+        )
+        const args = { offset: nextPage.current }
+        // AB test the default or defaultAlt site type
+        const defaultSiteType =
+            defaultOrAlt === 'A' ? { slug: 'default' } : { slug: 'defaultAlt' }
+        const siteType = searchParams.current.taxonomies?.siteType?.slug?.length
+            ? searchParams.current.taxonomies.siteType
+            : defaultSiteType
+        // End AB test - otherwise use { slug: 'default' } when empty
+        const params = cloneDeep(searchParams.current)
+        params.taxonomies.siteType = siteType
+        TemplatesApi.get(params, args)
+            .then((response) => {
+                if (!isMounted.current) return
+                if (response?.error?.length) {
+                    setServerError(response?.error)
+                    return
+                }
+                if (response?.records?.length <= 0) {
+                    setNothingFound(true)
+                    return
+                }
+                if (
+                    searchParamsRaw === searchParams.current &&
+                    response?.records?.length
+                ) {
+                    useTemplatesStore.setState({
+                        nextPage: response?.offset ?? '',
+                    })
+                    appendTemplates(response.records)
+                    setLoading(false)
+                }
             })
-            appendTemplates(response.records)
-            setNothingFound(response.records.length <= 0)
+            .catch((error) => {
+                if (!isMounted.current) return
+                console.error(error)
+                setServerError(defaultError)
+            })
+    }, [appendTemplates, isMounted, searchParamsRaw, defaultOrAlt])
+
+    useEffect(() => {
+        if (templates?.length === 0) {
+            setLoading(true)
+            return
         }
-    }, [searchParamsRaw, appendTemplates, isMounted])
+    }, [templates?.length, searchParamsRaw])
+
+    useEffect(() => {
+        // If there's a server error, retry the request
+        // This is temporary until we upgrade the bckend and add
+        // a tool like react query to handle this automatically
+        if (!retryOnce.current && serverError.length) {
+            retryOnce.current = true
+            fetchTemplates()
+        }
+    }, [serverError, fetchTemplates])
+
+    useEffect(() => {
+        // This will check the URL for a pattern type and set that and remove it
+        // TODO: possibly refactor this if we exapnd it to support layouts
+        if (!open || !taxonomies?.patternType?.length) return
+        const search = new URLSearchParams(window.location.search)
+        if (!search.has('ext-patternType')) return
+        const term = search.get('ext-patternType')
+        // Delete it right away
+        search.delete('ext-patternType')
+        window.history.replaceState(
+            null,
+            null,
+            window.location.pathname + '?' + search.toString(),
+        )
+        // Search the slug in patternTypes
+        const tax = taxonomies.patternType.find((t) => t.slug === term)
+        if (!tax) return
+        updateTaxonomies({ patternType: tax })
+        updateType('pattern')
+    }, [open, taxonomies, updateType, updateTaxonomies])
 
     // This is the main driver for loading templates
     // This loads the initial batch of templates. But if we don't yet have taxonomies.
     // There's also an option to skip loading on first mount
     useEffect(() => {
-        if (!Object.keys(searchParams.current.taxonomies).length) {
+        if (!Object.keys(searchParams.current?.taxonomies)?.length) {
             return
         }
 
@@ -97,36 +164,31 @@ export default function GridView() {
             })
             return
         }
-        // setImagesLoaded([])
         fetchTemplates()
-    }, [fetchTemplates, searchParams])
+        return () => resetTemplates()
+    }, [fetchTemplates, searchParams, resetTemplates])
 
     // Fetches when the load more is in view
     useEffect(() => {
-        inView && fetchTemplates()
-    }, [inView, fetchTemplates])
+        nextPage.current && inView && fetchTemplates()
+    }, [inView, fetchTemplates, templates])
 
-    if (serverError.length) {
+    if (serverError.length && retryOnce.current) {
         return (
             <div className="text-left">
                 <h2 className="text-left">{__('Server error', 'extendify')}</h2>
                 <code
-                    className="block max-w-xl p-4 mb-4"
-                    style={{
-                        minHeight: '10rem',
-                    }}>
+                    className="mb-4 block max-w-xl p-4"
+                    style={{ minHeight: '10rem' }}>
                     {serverError}
                 </code>
                 <Button
                     isTertiary
                     onClick={() => {
-                        updateSearchParams({
-                            taxonomies: {},
-                            search: '',
-                        })
+                        retryOnce.current = false
                         fetchTemplates()
                     }}>
-                    {__('Press here to reload experience')}
+                    {__('Press here to reload')}
                 </Button>
             </div>
         )
@@ -134,8 +196,8 @@ export default function GridView() {
 
     if (nothingFound) {
         return (
-            <div className="flex h-full items-center justify-center w-full -mt-2 sm:mt-0">
-                <h2 className="text-sm text-extendify-gray font-normal">
+            <div className="-mt-2 flex h-full w-full items-center justify-center sm:mt-0">
+                <h2 className="text-sm font-normal text-extendify-gray">
                     {sprintf(
                         searchParams.current.type === 'template'
                             ? __(
@@ -153,47 +215,74 @@ export default function GridView() {
         )
     }
 
-    if (!templates.length) {
-        return (
-            <div className="flex h-full items-center justify-center w-full -mt-2 sm:mt-0">
-                <Spinner />
-            </div>
-        )
-    }
-
-    const breakpointColumnsObj = {
-        default: 2,
-        1320: 2,
-        860: 1,
-        599: 2,
-        400: 1,
-    }
     return (
         <>
-            <Masonry
-                breakpointCols={breakpointColumnsObj}
-                className="flex -ml-6 md:-ml-8 w-auto pb-40 pt-0.5 px-0.5"
-                columnClassName="pl-6 md:pl-8 bg-clip-padding min-h-screen">
+            {loading && (
+                <div className="-mt-2 flex h-full w-full items-center justify-center sm:mt-0">
+                    <Spinner />
+                </div>
+            )}
+
+            <Grid type={currentType} templates={templates}>
                 {templates.map((template) => {
                     return (
                         <ImportTemplateBlock
+                            maxHeight={
+                                currentType === 'template' ? 520 : 'none'
+                            }
                             key={template.id}
                             template={template}
                         />
                     )
                 })}
-            </Masonry>
-            {useTemplatesStore.getState().nextPage && (
+            </Grid>
+
+            {nextPage.current && (
                 <>
-                    <div className="transform -translate-y-20">
+                    <div className="my-20">
                         <Spinner />
                     </div>
+                    {/* This is a large div that, when in view, will trigger more patterns to load */}
                     <div
-                        className="-translate-y-full flex flex-col h-80 items-end justify-end my-2 relative transform z-0 text"
+                        className="relative flex -translate-y-full transform flex-col items-end justify-end"
                         ref={loadMoreRef}
-                        style={{ zIndex: -1 }}></div>
+                        style={{
+                            zIndex: -1,
+                            marginBottom: '-100%',
+                            height:
+                                currentType === 'template' ? '150vh' : '75vh',
+                        }}
+                    />
                 </>
             )}
         </>
+    )
+})
+
+const Grid = ({ type, children }) => {
+    const sharedClasses = 'relative min-h-screen z-10 pb-40 pt-0.5'
+    switch (type) {
+        case 'template':
+            return (
+                <div
+                    className={`grid gap-6 md:gap-8 lg:grid-cols-2 ${sharedClasses}`}>
+                    {children}
+                </div>
+            )
+    }
+    const breakpointColumnsObj = {
+        default: 3,
+        1600: 2,
+        860: 1,
+        599: 2,
+        400: 1,
+    }
+    return (
+        <Masonry
+            breakpointCols={breakpointColumnsObj}
+            className={`-ml-6 flex w-auto px-0.5 md:-ml-8 ${sharedClasses}`}
+            columnClassName="pl-6 md:pl-8 bg-clip-padding space-y-6 md:space-y-8">
+            {children}
+        </Masonry>
     )
 }
